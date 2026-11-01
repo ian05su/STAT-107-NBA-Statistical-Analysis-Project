@@ -1,0 +1,82 @@
+---
+title: "21 - Data Processing"
+subtitle: "STAT 107 - NBA Statistical Analysis Project"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+```
+
+**What this file does.** It loads the cleaned data from `12_DataSaving.RData` and applies the inclusion rule (at least 20 games played), creates a new variable for the analysis, and saves the result to `22_DataSaving.RData`.
+
+## 1. Load packages, functions, and cleaned data
+
+```{r load}
+source("00_requirements.R")
+source("02_funct_DataProcessing.R")
+load("12_DataSaving.RData")
+dim(nba_clean)
+```
+
+## 2. Inclusion rule: at least 20 games played
+
+Our response variable is **points per game**, an average. The histogram shows how many players appeared in only a few games:
+
+```{r games-distribution}
+hist(nba_clean$games, breaks = 20, main = "Games played per player, 2024-25",
+     xlab = "Games played", ylab = "Number of players",
+     col = "#2a78d6", border = "white")
+abline(v = 20, lty = 2, lwd = 2)
+sum(nba_clean$games < 20)
+```
+
+We keep players with **at least 20 games**, about one quarter of the 82-game season.
+
+Removing low-minute players would cut off part of its range and remove exactly the bench players whose scoring we need to compare with starters.
+
+### Does the cutoff change the comparison?
+
+Before committing to 20 games, we compare the mean points per game by position under four different cutoffs, using a `for` loop.
+
+```{r compare-cutoffs}
+cutoffs <- c(1, 10, 20, 41)
+for (k in cutoffs) {
+  players_kept <- nba_clean[nba_clean$games >= k, ]
+  print(paste("At least", k, "games:", nrow(players_kept), "players"))
+  print(mean_by_position(players_kept$pts, players_kept$pos))
+}
+```
+
+The cutoff changes the overall level of scoring, because removing players with few games removes many low scorers. It barely changes the comparison between positions: point guards have the highest mean, centers the lowest, and the
+five positions stay within about two points of each other under every cutoff.
+
+### Apply the filter
+
+```{r apply-filter}
+min_games <- 20
+nba_model <- filter_min_games(nba_clean, min_games)
+table(nba_model$pos)
+```
+
+After the filter, `r nrow(nba_model)` players remain, and every position still has more than 75 players, enough to compare groups.
+
+## 3. Create a new variable: points per 36 minutes
+
+Points per game mixes two things: how often a player scores, and how long he
+plays. **Points per 36 minutes** removes the playing-time part. 
+
+```{r new-variable}
+nba_model$pts_per36 <- per36(nba_model$pts, nba_model$minutes)
+summary(nba_model$pts_per36)
+```
+
+
+## 4. Save the processed data
+
+```{r save}
+save(nba_clean, nba_model, min_games, file = "22_DataSaving.RData")
+```
+

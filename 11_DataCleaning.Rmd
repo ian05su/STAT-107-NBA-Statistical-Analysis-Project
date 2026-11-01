@@ -1,0 +1,165 @@
+---
+title: "11 - Data Cleaning"
+subtitle: "STAT 107 - NBA Statistical Analysis Project"
+output: 
+  html_document: default
+  pdf_document: default
+---
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+```
+
+**Research question.** In the 2024-25 NBA season, does a player's listed position predict scoring (points per game), and does any difference remain after accounting for playing time?
+
+**What this file does.** Loads the raw Basketball-Reference player data, checks it, checks missing values, removes duplicate rows for traded players, keeps the variables needed for the question, formats them, and saves the result to `12_DataSaving.RData` for `21_DataProcessing.Rmd`.
+
+## 1. Load packages and functions
+
+`00_requirements.R` installs and loads the packages used in the project. `01_funct_DataCleaning.R` contains the cleaning functions used below. Each function's purpose, input, and output are described in comments in that file.
+
+```{r load-functions}
+source("00_requirements.R")
+source("01_funct_DataCleaning.R")
+```
+
+## 2. Load the raw data
+
+2024-25 NBA per-game player statistics from Basketball-Reference, saved in `data/nba_2024_25.csv`.
+
+```{r load-data}
+nba_raw <- load_raw_data("data/nba_2024_25.csv")
+dim(nba_raw)
+```
+
+
+## 3. Inspect the raw data
+
+Each row is a player on one team, not a player: a player traded during the season has one season-total row (team `2TM` or `3TM`) followed by one row per team. Luka Dončić, rows 4 to 6, is an example.
+
+```{r inspect-structure}
+str(nba_raw)
+```
+
+```{r inspect-head}
+head(nba_raw[, c("Rk", "Player", "Age", "Team", "Pos", "G", "MP", "PTS")], 10)
+```
+
+The summary of the variables we need shows: no negative numbers, games played between 1 and 82 (the length of the season), and minutes per game well below the 48 minutes of a game.
+
+```{r inspect-summary}
+summary(nba_raw[, c("Age", "G", "GS", "MP", "PTS")])
+```
+
+## 4. Missing values
+
+```{r missing-values}
+count_missing(nba_raw)
+```
+
+Missing values appear only in the shooting-percentage columns. A percentage is missing when a player made no attempts of that type, so these NAs are not errors. None of the variables used to answer the question (`Pos`,`G`, `MP`, `PTS`) has missing values, so **no rows need to be removed** because of missing data.
+
+## 5. Remove duplicate rows for traded players
+
+We keep one row per player using the unique player ID `Player.additional`. Because the season-total row comes first for a traded player, keeping the first row keeps the season totals: a player's scoring for the whole season,
+not for one team.
+
+```{r remove-duplicates}
+nba_dedup <- remove_duplicate_players(nba_raw)
+nrow(nba_raw)
+nrow(nba_dedup)
+```
+
+We check the result instead of assuming it. First, every player ID should now appear exactly once (0 duplicates):
+
+```{r check-unique}
+sum(duplicated(nba_dedup$Player.additional))
+```
+
+Second, for every traded player, the row we kept should be the season-total row, so its team should be `2TM` or `3TM`, never a single team:
+
+```{r check-traded}
+traded_ids <- unique(nba_raw$Player.additional[duplicated(nba_raw$Player.additional)])
+length(traded_ids)
+
+kept_traded_rows <- nba_dedup[nba_dedup$Player.additional %in% traded_ids, ]
+table(kept_traded_rows$Team)
+```
+
+Both checks pass: the data went from `r nrow(nba_raw)` rows to `r nrow(nba_dedup)` players, and all `r length(traded_ids)` traded players kept their season-total row.
+
+## 6. Players listed at more than one position
+
+A traded player can be listed at a different position on each team:
+
+```{r position-changes}
+position_changes <- find_position_changes(nba_raw)
+position_changes
+```
+
+`r nrow(position_changes)` players changed listed position during the season.
+
+## 7. Keep only the variables of interest
+
+We keep the player's name and ID, position, playing time, scoring, and shot volume, and give the columns readable names. 
+
+| New name        | Raw column          | Meaning                                    |
+|-----------------|---------------------|--------------------------------------------|
+| `player`        | `Player`            | Player name                                |
+| `player_id`     | `Player.additional` | Unique Basketball-Reference ID             |
+| `age`           | `Age`               | Age on February 1, 2025                    |
+| `team`          | `Team`              | Team (`2TM`/`3TM` = played for 2/3 teams)  |
+| `pos`           | `Pos`               | Listed position                            |
+| `games`         | `G`                 | Games played                               |
+| `games_started` | `GS`                | Games started                              |
+| `minutes`       | `MP`                | Minutes played per game                    |
+| `fga`           | `FGA`               | Field-goal attempts per game               |
+| `three_pa`      | `X3PA`              | Three-point attempts per game              |
+| `fta`           | `FTA`               | Free-throw attempts per game               |
+| `pts`           | `PTS`               | Points per game (**response variable**)    |
+
+```{r select-variables}
+keep_columns <- c("Player", "Player.additional", "Age", "Team", "Pos", "G",
+                  "GS", "MP", "FGA", "X3PA", "FTA", "PTS")
+nba_clean <- nba_dedup[, keep_columns]
+
+names(nba_clean) <- c("player", "player_id", "age", "team", "pos", "games",
+                      "games_started", "minutes", "fga", "three_pa", "fta",
+                      "pts")
+names(nba_clean)
+```
+
+## 8. Format variables
+
+Position is a categorical variable, so we have to convert it to a factor. We order the levels from the perimeter to the basket (PG, SG, SF, PF, C) so every table and plot uses the same order.
+
+```{r format-position}
+nba_clean$pos <- factor(nba_clean$pos, levels = c("PG", "SG", "SF", "PF", "C"))
+table(nba_clean$pos)
+```
+
+Any position not in this list would become NA. The count below is 0, so all five positions are clean:
+
+```{r check-position}
+sum(is.na(nba_clean$pos))
+```
+
+Finally, we confirm the column types and that the cleaned data have no missing values at all.
+
+```{r final-check}
+str(nba_clean)
+sum(is.na(nba_clean))
+```
+
+The cleaned data have `r nrow(nba_clean)` players and `r ncol(nba_clean)` variables, with no missing values.
+
+## 9. Save the cleaned data
+
+```{r save}
+save(nba_clean, file = "12_DataSaving.RData")
+```
+
+`12_DataSaving.RData` contains one object, `nba_clean`, which is loaded by `21_DataProcessing.Rmd`.
+
+

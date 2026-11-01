@@ -1,0 +1,97 @@
+---
+title: "31 - Data Visualization and Descriptive Statistics"
+subtitle: "STAT 107 - NBA Statistical Analysis Project"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, fig.width = 7, fig.height = 4.5)
+```
+
+**What this file does.** It loads the processed data from `22_DataSaving.RData` and makes the numerical summaries and first plots for the question: *does a player's listed position predict points per game, and does any difference remain after accounting for playing time?* Every plot is followed by an interpretation. All plots use the players with at least 20 games (`nba_model`).
+
+## 1. Load packages, functions, and processed data
+
+```{r load}
+source("00_requirements.R")
+source("03_funct_Plots.R")
+load("22_DataSaving.RData")
+dim(nba_model)
+```
+
+## 2. Points per game by position: numerical summary
+
+```{r summary-pts}
+pts_summary <- summary_by_position(nba_model$pts, nba_model$pos)
+pts_summary
+```
+
+**Interpretation.** Point guards have the highest mean (10.9 points per game) and centers the lowest (9.3), a gap of only 1.6 points. The gap between the medians is even smaller (8.1 to 9.4). These gaps are small compared with the spread *within* each position: the standard deviation is about 6 points in every group, and every position includes both reserves under 2 points per game and stars above 20.
+
+## 3. Distribution of points per game (all positions)
+
+```{r hist-pts}
+plot_hist(nba_model$pts,
+          title = "Points per game, 2024-25 (players with 20+ games)",
+          xlab = "Points per game")
+```
+
+**Interpretation.** Scoring is strongly right-skewed: the middle half of players score between about 5 and 13 points per game, and a long tail of stars reaches above 30. The tail pulls the mean (10.1) above the median (8.7). Because the data are skewed, the analysis plan pairs the one-way ANOVA with a Kruskal-Wallis test, which compares the positions without assuming a normal distribution.
+
+## 4. Points per game by position: boxplots
+
+```{r box-pts, fig.height = 5}
+plot_box_by_position(nba_model$pts, nba_model$pos,
+                     title = "Points per game by position",
+                     ylab = "Points per game")
+```
+
+**Interpretation.** This is the key plot for the first part of the question. The five boxes overlap almost completely: the middle 50% of every position covers about the same range of points per game. The white diamonds (means) sit close together. Point guards have the highest outlier which raises their mean more than their median.
+
+## 5. Points per game by position: histograms
+
+```{r hist-by-position, fig.height = 6}
+plot_hist_by_position(nba_model$pts, nba_model$pos, xlab = "Points per game")
+```
+
+**Interpretation.** All five histograms use the same bins, and the dashed line marks each median. Every position has the same shape: most players between about 3 and 13 points per game and a long right tail. Point guards have a slightly heavier tail in the 20-to-30 range.
+
+## 6. Playing time by position
+
+Position could only *explain* scoring differences through playing time if playing time itself differs by position. We check that before controlling for it.
+
+```{r box-minutes, fig.height = 5}
+plot_box_by_position(nba_model$minutes, nba_model$pos,
+                     title = "Minutes per game by position",
+                     ylab = "Minutes per game")
+summary_by_position(nba_model$minutes, nba_model$pos)
+```
+
+**Interpretation.** Average playing time is similar across positions, from 20.4 minutes per game (C) to 22.3 (SF). Centers play slightly fewer minutes, which could explain part of their lower scoring. Because minutes differ little by position, we expect that controlling for minutes will not change the comparison between positions much.
+
+## 7. Points per game against minutes, by position
+
+```{r scatter-pts-minutes, fig.height = 5.5}
+plot_scatter_by_position(nba_model$minutes, nba_model$pts, nba_model$pos,
+                         title = "Points per game vs. minutes per game",
+                         xlab = "Minutes per game",
+                         ylab = "Points per game")
+cor(nba_model$minutes, nba_model$pts)
+```
+
+**Interpretation.** Minutes strongly predict scoring (correlation `r round(cor(nba_model$minutes, nba_model$pts), 2)`). The five fitted lines lie close together, so at equal playing time, positions score about the same. The point-guard line is slightly steeper, which the analysis will test. Points also spread out more as minutes increase, which we will check in the residual plots.
+
+## 8. Points per 36 minutes by position
+
+Points per 36 minutes puts every player on the same playing-time scale.
+
+```{r box-per36, fig.height = 5}
+plot_box_by_position(nba_model$pts_per36, nba_model$pos,
+                     title = "Points per 36 minutes by position",
+                     ylab = "Points per 36 minutes")
+summary_by_position(nba_model$pts_per36, nba_model$pos)
+```
+
+**Interpretation.** At equal playing time, the positions score at nearly the same rate: per-36 medians fall within 0.7 points of each other (14.8 to 15.5). Point guards have the highest mean (16.4), but only because of a few star scorers. This suggests position does not affect scoring once minutes are accounted for.
