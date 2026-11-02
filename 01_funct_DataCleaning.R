@@ -3,8 +3,8 @@
 # Input: path - location of the data set
 # Output: a data frame with one row per player per team
 load_raw_data <- function(path) {
-  read.csv(path, fileEncoding = "UTF-8-BOM")
-  return(data)
+  raw_data <- read.csv(path, fileEncoding = "UTF-8-BOM")
+  return(raw_data)
 }
 
 
@@ -29,8 +29,7 @@ remove_duplicate_players <- function(df) {
 # Input: df - data frame before removing the duplicates
 # Output: data frame with the players name and every position he was listed at
 find_position_changes <- function(df) {
-  traded_id <- unique(df$Player.additional[duplication(df$Player.additional)])
-  
+  traded_id <- unique(df$Player.additional[duplicated(df$Player.additional)])
   name_change <- c()
   position_change <- c()
   
@@ -38,7 +37,7 @@ find_position_changes <- function(df) {
     player_rows <- df[df$Player.additional == id, ]
     positions <- unique(player_rows$Pos)
     if (length(positions) > 1) {
-      name_change <- c(name_change, players_row$Player[1])
+      name_change <- c(name_change, player_rows$Player[1])
       position_change <- c(position_change, paste(positions, collapse = "/"))
     }
   }

@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 `00_requirements.R` installs and loads the packages used in the project. `01_funct_DataCleaning.R` contains the cleaning functions used below. Each function's purpose, input, and output are described in comments in that file.
 
 ```{r load-functions}
-source("00_requirements.R")
+source("R/00_requirements.R")
 source("01_funct_DataCleaning.R")
 ```
 
@@ -28,19 +28,23 @@ source("01_funct_DataCleaning.R")
 
 2024-25 NBA per-game player statistics from Basketball-Reference, saved in `data/nba_2024_25.csv`.
 
-```{r load-data}
-nba_raw <- load_raw_data("data/nba_2024_25.csv")
-dim(nba_raw)
-```
+
 
 
 ## 3. Inspect the raw data
 
 Each row is a player on one team, not a player: a player traded during the season has one season-total row (team `2TM` or `3TM`) followed by one row per team. Luka Dončić, rows 4 to 6, is an example.
 
+```{r load-data}
+nba_raw <- load_raw_data("data/nba_2024_25.csv")
+dim(nba_raw)
+```
+
+
 ```{r inspect-structure}
 str(nba_raw)
 ```
+
 
 ```{r inspect-head}
 head(nba_raw[, c("Rk", "Player", "Age", "Team", "Pos", "G", "MP", "PTS")], 10)
