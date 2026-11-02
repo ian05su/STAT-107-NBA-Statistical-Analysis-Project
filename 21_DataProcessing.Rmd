@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 ## 1. Load packages, functions, and cleaned data
 
 ```{r load}
-source("00_requirements.R")
+source("R/00_requirements.R")
 source("02_funct_DataProcessing.R")
 load("12_DataSaving.RData")
 dim(nba_clean)
