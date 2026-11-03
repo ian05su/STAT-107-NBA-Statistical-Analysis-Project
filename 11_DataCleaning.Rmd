@@ -25,10 +25,7 @@ source("01_funct_DataCleaning.R")
 ```
 
 ## 2. Load the raw data
-
 2024-25 NBA per-game player statistics from Basketball-Reference, saved in `data/nba_2024_25.csv`.
-
-
 
 
 ## 3. Inspect the raw data
