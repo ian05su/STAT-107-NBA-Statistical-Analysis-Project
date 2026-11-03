@@ -12,7 +12,7 @@ accounting for playing time?
 
 - **Source:** Basketball-Reference, *2024-25 NBA Player Stats: Per Game*,
   <https://www.basketball-reference.com/leagues/NBA_2025_per_game.html>
-  (downloaded [DATE] as CSV).
+  (downloaded 10/26/2027 as CSV).
 - **File:** `data/nba_2024_25.csv`. 735 rows × 32 columns, one row per
   player per team. Players traded during the season have a season-total row
   (`2TM`/`3TM`) plus one row per team.
