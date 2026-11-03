@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 `00_requirements.R` installs and loads the packages used in the project. `01_funct_DataCleaning.R` contains the cleaning functions used below. Each function's purpose, input, and output are described in comments in that file.
 
 ```{r load-functions}
-source("R/00_requirements.R")
+source("00_requirements.R")
 source("01_funct_DataCleaning.R")
 ```
 
