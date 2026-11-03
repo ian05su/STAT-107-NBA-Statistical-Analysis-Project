@@ -4,7 +4,7 @@
 # Output: filtered data frame
 filter_min_games <- function(df, min_games) {
   kept <- df[df$games >= min_games, ]
-  print(paste("Players Kept: ", nrow(df)))
+  print(paste("Players Kept: ", nrow(kept)))
   print(paste("Players removed", nrow(df) - nrow(kept)))
   return(kept)
 }
@@ -27,7 +27,7 @@ mean_by_position <- function(values, pos) {
 
 # Purpose: Convert per-game statistics into per 38 minutes. Compares players who play different minutes
 # Input: stat_per_game - points per game, minutes - minutes per game
-# Output: statistic per 36 minutes
+# Output: statistic per 38 minutes
 per36 <- function(stat_per_game, minutes) {
   return(stat_per_game / minutes * 36)
 }

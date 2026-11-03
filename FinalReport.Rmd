@@ -1,7 +1,7 @@
 ---
 title: "Does Listed Position Predict Scoring in the NBA? Evidence from the 2024-25 Season"
 subtitle: "STAT 107 - Half-Way Project Report"
-author: "Jashu, Ian, Aryenn"
+author: "Jashwant, Ian, Aryenn"
 date: "11/2/2026"
 output:
   pdf_document:
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
 
 ```{r load-everything, include = FALSE}
 # Load packages and the function files used in the project
-source("R/00_requirements.R")
+source("00_requirements.R")
 source("01_funct_DataCleaning.R")
 source("03_funct_Plots.R")
 
@@ -43,7 +43,7 @@ r_pts_min     <- cor(nba_model$minutes, nba_model$pts)
 
 # Abstract
 
-In basketball, a player's position (point guard, shooting guard, small forward, power forward, or center) is meant to say something about how much he scores. We ask whether the listed position predicts points per game in the 2024-25 NBA season, and whether any difference remains after factoring in playing time. We use per game statistics from Basketball-Reference for `r n_model` players who appeared in at least `r min_games` games. So far, the differences between positions are pretty small. Point guards score the most (mean `r round(pos_means["PG"], 1)` points per game) and centers score the least (mean `r round(pos_means["C"], 1)`), a gap of only `r round(pos_means["PG"] - pos_means["C"], 1)` points, which is small compared with the spread within each position. Playing time is strongly related to scoring (correlation `r round(r_pts_min, 2)`), and when scoring is put on a per 36-minute scale, the position medians differ by only `r round(diff(range(per36_medians)), 1)` points. These results suggest that position has a little effect on scoring once minutes are considered. In the next stage we'll test this with ANOVA, a Kruskal-Wallis test, and regression models.
+In basketball, a player's position (point guard, shooting guard, small forward, power forward, or center) is meant to say something about how much he scores. We ask whether the listed position predicts points per game in the 2024-25 NBA season, and whether any difference remains after factoring in playing time. We use per game statistics from Basketball-Reference for `r n_model` players who appeared in at least `r min_games` games. So far, the differences between positions are pretty small. Point guards score the most (mean `r round(pos_means["PG"], 1)` points per game) and centers score the least (mean `r round(pos_means["C"], 1)`), a gap of only `r round(pos_means["PG"] - pos_means["C"], 1)` points, which is small compared with the spread within each position. Playing time is strongly related to scoring (correlation `r round(r_pts_min, 2)`), and when scoring is put on a per 36-minute scale, the position medians differ by only `r round(diff(range(per36_medians)), 1)` points. These results suggest that position has little effect on scoring once minutes are considered. In the next stage we'll test this with ANOVA, a Kruskal-Wallis test, and regression models.
 
 # Introduction
 
@@ -65,7 +65,7 @@ This is a hypothesis testing and explanatory modeling problem. We want to test w
 
 ## Source and variables
 
-The data are the 2024-25 NBA per-game player statistics from Basketball-Reference (https://www.basketball-reference.com), stored in `data/nba_2024_25.csv`. The raw file has `r n_raw` rows and many columns, because a player who was traded during the season appears in several rows: one season total row (team `2TM` or `3TM`) and one row for each team he played for.
+The data are the 2024-25 NBA per-game player statistics from Basketball-Reference (https://www.basketball-reference.com/leagues/NBA_2025_per_game.html), stored in `data/nba_2024_25.csv`. The raw file has `r n_raw` rows and many columns, because a player who was traded during the season appears in several rows: one season total row (team `2TM` or `3TM`) and one row for each team he played for.
 
 After cleaning, we keep the variables listed below.
 
@@ -137,7 +137,7 @@ plot_box_by_position(nba_model$minutes, nba_model$pos,
                      ylab = "Minutes per game")
 ```
 
-Average playing time is similar across positions, from `r round(min(minutes_means), 1)` to `r round(max(minutes_means), 1)` minutes per game. Centers play slightly less minutes, which could explain part of their lower scoring. Since minutes differ little by position, we expect that controlling for minutes won't change the comparison between positions much.
+Average playing time is similar across positions, from `r round(min(minutes_means), 1)` to `r round(max(minutes_means), 1)` minutes per game. Centers play fewer minutes, which could explain part of their lower scoring. Since minutes differ little by position, we expect that controlling for minutes won't change the comparison between positions much.
 
 ```{r scatter-pts-minutes, fig.height = 5.5}
 plot_scatter_by_position(nba_model$minutes, nba_model$pts, nba_model$pos,
@@ -160,7 +160,7 @@ At equal playing time the positions score at nearly the same rate: the per-36 me
 
 ## Further visualizations planned
 
-In the next stage we'll add. (1) residual plots and normal Q-Q plots for each model, to check the model assumptions. (2) a plot of the estimated position effects with confidence intervals, from both the model without minutes and the model with minutes, so the two can be compared directly. (3) a plot of the Tukey pairwise differences between positions. (4) scatter plots of points per game against shot attempts (field-goal, three point, and free throw attempts) to see whether shot volume explains scoring better than position does.
+In the next stage we'll add: (1) residual plots and normal Q-Q plots for each model, to check the model assumptions. (2) a plot of the estimated position effects with confidence intervals, from both the model without minutes and the model with minutes, so the two can be compared directly. (3) a plot of the Tukey pairwise differences between positions. (4) scatter plots of points per game against shot attempts (field-goal, three point, and free throw attempts) to see whether shot volume explains scoring better than position does.
 
 # Analysis Plan
 
@@ -173,7 +173,7 @@ $$\text{pts}_i = \beta_0 + \beta_1\,\text{minutes}_i + \gamma_{\text{pos}(i)} + 
 where $\gamma_{\text{pos}}$ are the position effects relative to a reference position. The key question is whether the position coefficients stay different from zero after adding minutes. We expect minutes to be the dominant predictor, and the position coefficients to be close to zero.
 4. **Interaction model.** The scatter plot suggests the point guard line is slightly steeper. We'll add a position-by-minutes interaction and use an F-test to compare it with the model without the interaction, to see whether the benefit of extra minutes differs by position.
 5. **Points per 36 minutes.** We'll repeat the ANOVA and Kruskal-Wallis comparison using `pts_per36` as the response, as a second way of removing playing time.
-6. **Model diagnostics and fixes.** We'll check residual plots for non constant variance and non-normality. Because points spread out more at high minutes.
+6. **Model diagnostics and fixes.** We'll check residual plots for non constant variance and non-normality because points spread out more at high minutes.
 7. **Sensitivity checks.** We'll repeat the main models with different game cutoffs (10 and 41 games) and see whether the conclusions change. We'll also look at the players who changed listed position during the season.
 8. **Extension.** If time allows, we'll add shot attempts (`fga`, `three_pa`, `fta`) and age to the regression to see whether shot volume explains scoring better than position.
 
