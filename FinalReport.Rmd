@@ -41,6 +41,8 @@ minutes_means <- tapply(nba_model$minutes, nba_model$pos, mean)
 r_pts_min     <- cor(nba_model$minutes, nba_model$pts)
 ```
 
+**GitHub repository:** <https://github.com/ian05su/STAT-107-NBA-Statistical-Analysis-Project>
+
 # Abstract
 
 In basketball, a player's position (point guard, shooting guard, small forward, power forward, or center) is meant to say something about how much he scores. We ask whether the listed position predicts points per game in the 2024-25 NBA season, and whether any difference remains after factoring in playing time. We use per-game statistics from Basketball-Reference for `r n_model` players who appeared in at least `r min_games` games. So far, the differences between positions are pretty small. Point guards score the most (mean `r round(pos_means["PG"], 1)` points per game) and centers score the least (mean `r round(pos_means["C"], 1)`), a gap of only `r round(pos_means["PG"] - pos_means["C"], 1)` points, which is small compared with the spread within each position. Playing time is strongly related to scoring (correlation `r round(r_pts_min, 2)`), and when scoring is put on a per 36-minute scale, the position medians differ by only `r round(diff(range(per36_medians)), 1)` points. These results suggest that position has little effect on scoring once minutes are considered. In the next stage we'll test this with ANOVA, a Kruskal-Wallis test, and regression models.
