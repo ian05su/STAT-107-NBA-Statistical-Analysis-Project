@@ -41,7 +41,8 @@ minutes_means <- tapply(nba_model$minutes, nba_model$pos, mean)
 r_pts_min     <- cor(nba_model$minutes, nba_model$pts)
 ```
 
-**GitHub repository:** <https://github.com/ian05su/STAT-107-NBA-Statistical-Analysis-Project>
+**GitHub repository:** 
+<https://github.com/ian05su/STAT-107-NBA-Statistical-Analysis-Project>
 
 # Abstract
 
@@ -183,3 +184,25 @@ where $\gamma_{\text{pos}}$ are the position effects relative to a reference pos
 **Expected outcome.** We expect to find a small or non significant position effect on points per game, and little or no position effect after accounting for minutes, which would support "positionless basketball" view. A significant interaction for point guards, or a position effect that survives the minutes control, would be the main evidence against that view.
 
 **Limitations.** The data cover a single season, position is the listed (single-label) position and not what a player actually did on the court, and the study is observational, so our conclusions describe associations and not causes.
+
+## Contributions:
+**Jashwant Kandhipati**
+- Reorganized the repository's file structure.
+- Wrote the function files (`01_funct_DataCleaning.R`, `02_funct_DataProcessing.R`, `03_funct_Plots.R`).
+- Wrote the data cleaning, processing, and visualization files (`11_DataCleaning.Rmd`, `21_DataProcessing.Rmd`, `31_DataVisualization.Rmd`).
+- Fixed knitting errors across the project and simplified `00_requirements.R` to the packages actually used.
+- Wrote `README.md` and removed unused files (old `R/` folder, renv setup, knitted HTML files).
+- Edited and formatted the final report: fixed typos, cleaned up tables and figure sizes, added the data source date and the GitHub link.
+- Managed the final repository: merged changes and added the saved data files.
+
+**Ian**
+- Created the GitHub repository and RStudio project, added the 2024-25 NBA dataset in the initial commit.
+- Set up the first folder structure for the project.
+- Wrote the first exploratory script comparing average points per game by position, which shaped the research question.
+- Wrote the first version of `00_requirements.R`.
+
+**Aryenn**
+
+- Knit the cleaning, processing, and visualization files and committed the generated outputs (`12_DataSaving.RData` and knitted HTML files).
+- Wrote the `FinalReport.rmd` file and proofread to make sure it was good. Knitted and checked the pdf output as well. 
+- Made sure the project can run on a clean install. 
