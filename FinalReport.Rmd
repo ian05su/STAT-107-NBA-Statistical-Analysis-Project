@@ -187,6 +187,7 @@ where $\gamma_{\text{pos}}$ are the position effects relative to a reference pos
 
 ## Contributions:
 **Jashwant Kandhipati**
+
 - Reorganized the repository's file structure.
 - Wrote the function files (`01_funct_DataCleaning.R`, `02_funct_DataProcessing.R`, `03_funct_Plots.R`).
 - Wrote the data cleaning, processing, and visualization files (`11_DataCleaning.Rmd`, `21_DataProcessing.Rmd`, `31_DataVisualization.Rmd`).
@@ -196,10 +197,10 @@ where $\gamma_{\text{pos}}$ are the position effects relative to a reference pos
 - Managed the final repository: merged changes and added the saved data files.
 
 **Ian**
+
 - Created the GitHub repository and RStudio project, added the 2024-25 NBA dataset in the initial commit.
-- Set up the first folder structure for the project.
+- Set up the first folder structure for the project and wrote first version of `00_requirments.r`
 - Wrote the first exploratory script comparing average points per game by position, which shaped the research question.
-- Wrote the first version of `00_requirements.R`.
 
 **Aryenn**
 
